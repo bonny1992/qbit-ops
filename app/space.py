@@ -18,9 +18,9 @@ QBIT_SSL  = os.getenv('QBIT_SSL', False)
 QBIT_USER = os.getenv('QBIT_USER', '')
 QBIT_PASS = os.getenv('QBIT_PASS', '')
 
-LOGFILE = os.getenv('LOGFILE','./space.log')
+LOGFILE = os.getenv('LOGFILE','/app/logs/space.log')
 MIN_SPACE_GB = os.getenv('MIN_SPACE_GB', 150)
-DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR','./')
+DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR','/')
 DRY_RUN = os.getenv('DRY_RUN', False)
 
 log = logging.getLogger('')
