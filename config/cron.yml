@@ -1,0 +1,6 @@
+jobs:
+    - name: space-check
+      command:
+        - python3
+        - /app/space.py
+      schedule: "* * * * *"

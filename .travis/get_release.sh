@@ -1,0 +1,1 @@
+curl -sX GET "https://api.github.com/repos/bonny1992/informrr/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]' | sed 's/^v//g'
