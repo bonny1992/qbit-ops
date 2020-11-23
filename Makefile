@@ -1,4 +1,4 @@
-IMAGE := bonny1992/qbit-op
+IMAGE := bonny1992/qbit-ops
 $(eval RELEASE = $(shell chmod +x .travis/get_release.sh && .travis/get_release.sh))
 
 echo:
