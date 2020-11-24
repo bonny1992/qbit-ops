@@ -59,7 +59,7 @@ if free_gb > MIN_SPACE_GB:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if not DRY_RUN:
+        if DRY_RUN != 'yes':
             qb.resume(torrent['hash'])
         log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
@@ -70,10 +70,10 @@ else:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if not DRY_RUN:
+        if DRY_RUN != 'yes':
             qb.pause(torrent['hash'])
         log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
-    log.info('Started %d of %d torrents.', i, no_of_torrents)
+    log.info('Paused %d of %d torrents.', i, no_of_torrents)
 
 qb.logout()
