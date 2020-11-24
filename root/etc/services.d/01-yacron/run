@@ -3,4 +3,4 @@
 cd /app || exit
 
 exec \
-	s6-setuidgid abc chown -R abc:abc /config && yacron -c /config/cron.yml
+	s6-setuidgid abc yacron -c /config/cron.yml
