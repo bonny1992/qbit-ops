@@ -13,7 +13,9 @@ RUN echo "**** install dependencies ****" && \
 COPY app/ /app
 COPY config/ /config
 
-RUN pip install -r /app/requirements.txt && apk del python3-dev alpine-sdk
+RUN chown -R abc:abc /config && \
+    pip install -r /app/requirements.txt && \
+    apk del python3-dev alpine-sdk
 
 
 COPY root/ /
