@@ -14,17 +14,19 @@ gb = 10 ** 9
 
 QBIT_HOST = os.getenv('QBIT_HOST', '127.0.0.1')
 QBIT_PORT = os.getenv('QBIT_PORT', '8080')
-QBIT_SSL  = os.getenv('QBIT_SSL', False)
+QBIT_SSL  = os.getenv('QBIT_SSL', 'no')
 QBIT_USER = os.getenv('QBIT_USER', '')
 QBIT_PASS = os.getenv('QBIT_PASS', '')
 
 LOGFILE = os.getenv('LOGFILE','/config/logs/space.log')
 MIN_SPACE_GB = os.getenv('MIN_SPACE_GB', 150)
 DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR','/')
-DRY_RUN = os.getenv('DRY_RUN', False)
+DRY_RUN = os.getenv('DRY_RUN', 'no')
+
+DEBUG = os.getenv('SET_DEBUG', 'no')
 
 log = logging.getLogger('')
-log.setLevel(logging.INFO)
+log.setLevel(logging.INFO if DEBUG == 'no' else logging.DEBUG)
 format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 ch = logging.StreamHandler(sys.stdout)
@@ -47,7 +49,7 @@ free_gb = free / gb
 
 log.info("Free space: %s", free_gb)
 
-qb = Client('http{ssl}://{host}:{port}/'.format(host=QBIT_HOST, port=QBIT_PORT, ssl='s' if QBIT_SSL else ''))
+qb = Client('http{ssl}://{host}:{port}/'.format(host=QBIT_HOST, port=QBIT_PORT, ssl='s' if QBIT_SSL == 'yes' else ''))
 
 qb.login(QBIT_USER, QBIT_PASS)
 
@@ -59,7 +61,7 @@ if free_gb > MIN_SPACE_GB:
     for torrent in torrents:
         if not DRY_RUN:
             qb.resume(torrent['hash'])
-        log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN else '')
+        log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
     log.info('Started %d of %d torrents.', i, no_of_torrents)
 else:
@@ -70,7 +72,7 @@ else:
     for torrent in torrents:
         if not DRY_RUN:
             qb.pause(torrent['hash'])
-        log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN else '')
+        log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
     log.info('Started %d of %d torrents.', i, no_of_torrents)
 

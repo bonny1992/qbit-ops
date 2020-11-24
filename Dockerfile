@@ -1,5 +1,15 @@
 FROM lsiobase/alpine:3.11
 
+ENV QBIT_HOST=127.0.0.1
+ENV QBIT_PORT=8080
+ENV QBIT_SSL=False
+ENV QBIT_USER=
+ENV QBIT_PASS=
+ENV LOGFILE=/config/logs/space.log
+ENV MIN_SPACE_GB=150
+ENV DOWNLOAD_DIR=/
+ENV DRY_RUN=False
+
 RUN echo "**** install dependencies ****" && \
     apk add --no-cache python3 python3-dev alpine-sdk && \
     \
