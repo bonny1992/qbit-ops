@@ -71,7 +71,7 @@ else:
     i = 0
     for torrent in torrents:
         if DRY_RUN != 'yes':
-            if torrent['state'] == 'downloading':
+            if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL':
                 qb.pause(torrent['hash'])
         log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
