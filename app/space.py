@@ -70,7 +70,7 @@ else:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL':
+        if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL' or torrent['state'] == 'stalledDL':
             if DRY_RUN != 'yes':
                     qb.pause(torrent['hash'])
             log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
