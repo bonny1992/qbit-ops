@@ -21,6 +21,8 @@ QBIT_PASS = os.getenv('QBIT_PASS', '')
 LOGFILE = os.getenv('LOGFILE','/config/logs/space.log')
 MIN_SPACE_GB = int(os.getenv('MIN_SPACE_GB', 150))
 DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR','/')
+DO_NOT_RESUME_TAG = os.getenv('DO_NOT_RESUME_TAG', 'do_not_resume')
+DO_NOT_PAUSE_TAG = os.getenv('DO_NOT_PAUSE_TAG', 'do_not_pause')
 DRY_RUN = os.getenv('DRY_RUN', 'no')
 
 DEBUG = os.getenv('SET_DEBUG', 'no')
@@ -59,8 +61,9 @@ if free_gb > MIN_SPACE_GB:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if DRY_RUN != 'yes':
-            qb.resume(torrent['hash'])
+        if DO_NOT_RESUME_TAG in torrent['tags']:
+            if DRY_RUN != 'yes':
+                qb.resume(torrent['hash'])
         log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         i = i + 1
     log.info('Started %d of %d torrents.', i, no_of_torrents)
@@ -71,7 +74,8 @@ else:
     i = 0
     for torrent in torrents:
         if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL' or torrent['state'] == 'stalledDL':
-            if DRY_RUN != 'yes':
+            if DO_NOT_PAUSE_TAG not in torrent['tags']:
+                if DRY_RUN != 'yes':
                     qb.pause(torrent['hash'])
             log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
             i = i + 1
