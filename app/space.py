@@ -64,8 +64,8 @@ if free_gb > MIN_SPACE_GB:
         if DO_NOT_RESUME_TAG in torrent['tags']:
             if DRY_RUN != 'yes':
                 qb.resume(torrent['hash'])
-        log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-        i = i + 1
+            log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+            i = i + 1
     log.info('Started %d of %d torrents.', i, no_of_torrents)
 else:
     log.info('Pausing active torrents...')
@@ -77,8 +77,8 @@ else:
             if DO_NOT_PAUSE_TAG not in torrent['tags']:
                 if DRY_RUN != 'yes':
                     qb.pause(torrent['hash'])
-            log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-            i = i + 1
+                log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                i = i + 1
     log.info('Paused %d of %d torrents.', i, no_of_torrents)
 
 qb.logout()
