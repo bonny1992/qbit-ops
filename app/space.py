@@ -61,7 +61,7 @@ if free_gb > MIN_SPACE_GB:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if DO_NOT_RESUME_TAG in torrent['tags']:
+        if DO_NOT_RESUME_TAG not in torrent['tags']:
             if DRY_RUN != 'yes':
                 qb.resume(torrent['hash'])
             log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
