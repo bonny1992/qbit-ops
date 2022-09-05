@@ -1,4 +1,4 @@
-FROM --platform=$TARGETPLATFORM lsiobase/alpine:3.11
+FROM --platform=$BUILDPLATFORM lsiobase/alpine:3.11
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
