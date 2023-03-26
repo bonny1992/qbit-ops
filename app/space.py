@@ -61,16 +61,19 @@ if free_gb > MIN_SPACE_GB:
     no_of_torrents = len(torrents)
     i = 0
     for torrent in torrents:
-        if torrent['state'] != 'pausedUP':
-            if DO_NOT_RESUME_TAG not in torrent['tags']:
-                if DRY_RUN != 'yes':
-                    qb.resume(torrent['hash'])
-                log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-                i = i + 1
+        if torrent['category'] != '':
+            if torrent['state'] != 'pausedUP':
+                if DO_NOT_RESUME_TAG not in torrent['tags']:
+                    if DRY_RUN != 'yes':
+                        qb.resume(torrent['hash'])
+                    log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                    i = i + 1
+                else:
+                    log.debug('Torrent name: %s not resumed as tag %s avoids it%s', torrent['name'], DO_NOT_RESUME_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
             else:
-                log.debug('Torrent name: %s not resumed as tag %s avoids it%s', torrent['name'], DO_NOT_RESUME_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                log.debug('Torrent name: %s not resumed as it is seeding%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
         else:
-            log.debug('Torrent name: %s not resumed as it is seeding%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+            log.debug('Torrent name: %s not resumed as it has no category%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
     log.info('Started %d of %d torrents.', i, no_of_torrents)
 else:
     log.info('Pausing active torrents...')
