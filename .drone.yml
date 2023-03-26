@@ -3,8 +3,8 @@ kind: pipeline
 name: default
 
 steps:
-  - name: docker
-    image: thegeeklab/drone-docker-buildx
+  - name: docker-to-hub
+    image: thegeeklab/drone-docker-buildx:latest
     privileged: true
     settings:
       username:
@@ -12,6 +12,34 @@ steps:
       password:
         from_secret: DOCKER_PASS
       repo: bonny1992/qbit-ops
+      tags: latest
+      platforms:
+        - linux/amd64
+        - linux/arm64/v8
+  - name: docker-to-quay
+    image: thegeeklab/drone-docker-buildx:latest
+    privileged: true
+    settings:
+      username:
+        from_secret: QUAY_USER
+      password:
+        from_secret: QUAY_PASS
+      registry: quay.io
+      repo: quay.io/bonny1992/qbit-ops
+      tags: latest
+      platforms:
+        - linux/amd64
+        - linux/arm64/v8
+  - name: docker-to-ghcr
+    image: thegeeklab/drone-docker-buildx:latest
+    privileged: true
+    settings:
+      username:
+        from_secret: GHCR_USER
+      password:
+        from_secret: GITHUB_TOKEN
+      registry: ghcr.io
+      repo: ghcr.io/bonny1992/qbit-ops
       tags: latest
       platforms:
         - linux/amd64
