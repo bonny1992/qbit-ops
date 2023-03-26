@@ -85,4 +85,4 @@ else:
                 log.debug('Torrent name: %s not paused as tag %s avoids it%s', torrent['name'], DO_NOT_PAUSE_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
     log.info('Paused %d of %d torrents.', i, no_of_torrents)
 
-qb.logout()
+# qb.logout()
