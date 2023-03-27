@@ -56,6 +56,8 @@ qb = Client('http{ssl}://{host}:{port}/'.format(host=QBIT_HOST, port=QBIT_PORT, 
 qb.login(QBIT_USER, QBIT_PASS)
 
 if free_gb > MIN_SPACE_GB:
+    log.info('Instructing QBittorrent to enable auto start for new torrents...')
+    qb.set_preferences(start_paused_enabled=False)
     log.info('Starting paused torrents...')
     torrents = qb.torrents(filter='paused')
     no_of_torrents = len(torrents)
@@ -76,6 +78,8 @@ if free_gb > MIN_SPACE_GB:
             log.debug('Torrent name: %s not resumed as it has no category%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
     log.info('Started %d of %d torrents.', i, no_of_torrents)
 else:
+    log.info('Instructing QBittorrent to disable auto start for new torrents...')
+    qb.set_preferences(start_paused_enabled=True)
     log.info('Pausing active torrents...')
     torrents = qb.torrents(filter='downloading')
     no_of_torrents = len(torrents)
