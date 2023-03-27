@@ -1,5 +1,7 @@
 FROM --platform=$BUILDPLATFORM lsiobase/alpine:3.11
 
+LABEL org.opencontainers.image.source https://github.com/bonny1992/qbit-ops
+
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
