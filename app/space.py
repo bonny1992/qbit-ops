@@ -20,6 +20,7 @@ QBIT_PASS = os.getenv('QBIT_PASS', '')
 
 LOGFILE = os.getenv('LOGFILE','/config/logs/space.log')
 MIN_SPACE_GB = int(os.getenv('MIN_SPACE_GB', 150))
+SWEET_SPOT_GB = int(os.getenv('SWEET_SPOT_GB', 25))
 DOWNLOAD_DIR = os.getenv('DOWNLOAD_DIR','/')
 DO_NOT_RESUME_TAG = os.getenv('DO_NOT_RESUME_TAG', 'do_not_resume')
 DO_NOT_PAUSE_TAG = os.getenv('DO_NOT_PAUSE_TAG', 'do_not_pause')
@@ -55,7 +56,7 @@ qb = Client('http{ssl}://{host}:{port}/'.format(host=QBIT_HOST, port=QBIT_PORT, 
 
 qb.login(QBIT_USER, QBIT_PASS)
 
-if free_gb > MIN_SPACE_GB:
+if free_gb > (MIN_SPACE_GB + SWEET_SPOT_GB):
     log.info('Instructing QBittorrent to enable auto start for new torrents...')
     qb.set_preferences(start_paused_enabled=False)
     log.info('Starting paused torrents...')
