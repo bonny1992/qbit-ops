@@ -62,7 +62,7 @@ def fetch_env_variables():
         
         # Incremento l'indice
         i += 1
-
+    log.debug("Lista dizionari: %s", lista_dizionari)
     return lista_dizionari
 
 
@@ -79,6 +79,7 @@ def manage_torrent_clients(toBePaused, lista_dizionari):
 
         # Fai una richiesta GET per ottenere la lista dei client di download
         response = requests.get(endpoint, headers=headers)
+        log.debug("Response: %s", response)
 
         # Converte la risposta in un oggetto JSON
         data = response.json()
@@ -95,6 +96,7 @@ def manage_torrent_clients(toBePaused, lista_dizionari):
 
                 # Fai una richiesta GET per ottenere la configurazione del client
                 config_response = requests.get(config_endpoint, headers=headers)
+                log.debug("Config response: %s", config_response)
 
                 # Converte la risposta in un oggetto JSON
                 config_data = config_response.json()
