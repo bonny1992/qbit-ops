@@ -132,3 +132,6 @@ dmypy.json
 
 # Git files
 .git/
+
+app/test.py
+app/*/
