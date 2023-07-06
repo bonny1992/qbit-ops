@@ -74,7 +74,7 @@ def manage_torrent_clients(toBePaused, lista_dizionari):
         api_key = item['api_key']
 
         # Crea l'endpoint per ottenere i client di download
-        endpoint = f"https://{url}/api/v3/downloadclient"
+        endpoint = f"{url}/api/v3/downloadclient"
         headers = {"X-Api-Key": api_key}
 
         # Fai una richiesta GET per ottenere la lista dei client di download
@@ -91,7 +91,7 @@ def manage_torrent_clients(toBePaused, lista_dizionari):
                 client_id = client['id']
 
                 # Crea l'endpoint per ottenere la configurazione del client
-                config_endpoint = f"https://{url}/api/v3/downloadclient/{client_id}"
+                config_endpoint = f"{url}/api/v3/downloadclient/{client_id}"
 
                 # Fai una richiesta GET per ottenere la configurazione del client
                 config_response = requests.get(config_endpoint, headers=headers)
