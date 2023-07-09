@@ -169,7 +169,7 @@ if free_gb > (MIN_SPACE_GB + SWEET_SPOT_GB):
         else:
             log.debug('Torrent name: %s not resumed as it has no category%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
     log.info('Started %d of %d torrents.', i, no_of_torrents)
-    log.info('Instructing *arr softares to add new torrents as normael...')
+    log.info('Instructing *arr applications to add new torrents as normal...')
     manage_torrent_clients(False, lista_dizionari)
 else:
     log.info('Instructing QBittorrent to disable auto start for new torrents...')
@@ -188,7 +188,7 @@ else:
             else:
                 log.debug('Torrent name: %s not paused as tag %s avoids it%s', torrent['name'], DO_NOT_PAUSE_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
     log.info('Paused %d of %d torrents.', i, no_of_torrents)
-    log.info('Instructing *arr softares to add new torrents as paused...')
+    log.info('Instructing *arr applications to add new torrents as paused...')
     manage_torrent_clients(True, lista_dizionari)
 
 # qb.logout() Not working anymore? Idk
