@@ -7,7 +7,7 @@ import sys
 import getpass
 import requests
 
-from qbittorrent import Client
+import qbittorrentapi
 
 gb = 10 ** 9
 
@@ -125,9 +125,9 @@ ch = logging.StreamHandler(sys.stdout)
 ch.setFormatter(format)
 log.addHandler(ch)
 
-fh = handlers.RotatingFileHandler(LOGFILE, maxBytes=(1048576*5), backupCount=7)
-fh.setFormatter(format)
-log.addHandler(fh)
+# fh = handlers.RotatingFileHandler(LOGFILE, maxBytes=(1048576*5), backupCount=7)
+# fh.setFormatter(format)
+# log.addHandler(fh)
 
 log.debug("User: %s", getpass.getuser())
 
@@ -143,52 +143,60 @@ free_gb = free / gb
 
 log.info("Free space: %s", free_gb)
 
-qb = Client('http{ssl}://{host}:{port}/'.format(host=QBIT_HOST, port=QBIT_PORT, ssl='s' if QBIT_SSL == 'yes' else ''))
+conn_info = dict(
+    host=f"http{'s' if QBIT_SSL != 'no' else ''}://{QBIT_HOST}",
+    port=QBIT_PORT,
+    username=QBIT_USER,
+    password=QBIT_PASS,
+)
 
-qb.login(QBIT_USER, QBIT_PASS)
+free_gb = 50
 
-if free_gb > (MIN_SPACE_GB + SWEET_SPOT_GB):
-    log.info('Instructing QBittorrent to enable auto start for new torrents...')
-    qb.set_preferences(start_paused_enabled=False)
-    log.info('Starting paused torrents...')
-    torrents = qb.torrents(filter='paused')
-    no_of_torrents = len(torrents)
-    i = 0
-    for torrent in torrents:
-        if torrent['category'] != '':
-            if torrent['state'] != 'pausedUP':
-                if DO_NOT_RESUME_TAG not in torrent['tags']:
+with qbittorrentapi.Client(**conn_info) as qbt_client:
+
+    if free_gb > (MIN_SPACE_GB + SWEET_SPOT_GB):
+        log.info('Instructing QBittorrent to enable auto start for new torrents...')
+        # qb.set_preferences(start_paused_enabled=False)
+        qbt_client.app_set_preferences({'add_stopped_enabled': False})
+        log.info('Starting paused torrents...')
+        torrents = qbt_client.torrents_info(status_filter='paused')
+        no_of_torrents = len(torrents)
+        i = 0
+        for torrent in torrents:
+            if torrent['category'] != '':
+                if torrent['state'] != 'pausedUP':
+                    if DO_NOT_RESUME_TAG not in torrent['tags']:
+                        if DRY_RUN != 'yes':
+                            torrent.resume()
+                        log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                        i = i + 1
+                    else:
+                        log.debug('Torrent name: %s not resumed as tag %s avoids it%s', torrent['name'], DO_NOT_RESUME_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                else:
+                    log.debug('Torrent name: %s not resumed as it is seeding%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+            else:
+                log.debug('Torrent name: %s not resumed as it has no category%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+        log.info('Started %d of %d torrents.', i, no_of_torrents)
+        log.info('Instructing *arr applications to add new torrents as normal...')
+        manage_torrent_clients(False, lista_dizionari)
+    else:
+        log.info('Instructing QBittorrent to disable auto start for new torrents...')
+        qbt_client.app_set_preferences({'add_stopped_enabled': True})
+        log.info('Pausing active torrents...')
+        torrents = qbt_client.torrents_info(status_filter='downloading')
+        no_of_torrents = len(torrents)
+        i = 0
+        for torrent in torrents:
+            if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL' or torrent['state'] == 'stalledDL':
+                if DO_NOT_PAUSE_TAG not in torrent['tags']:
                     if DRY_RUN != 'yes':
-                        qb.resume(torrent['hash'])
-                    log.debug('Torrent name: %s started%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                        torrent.pause()
+                    log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
                     i = i + 1
                 else:
-                    log.debug('Torrent name: %s not resumed as tag %s avoids it%s', torrent['name'], DO_NOT_RESUME_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-            else:
-                log.debug('Torrent name: %s not resumed as it is seeding%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-        else:
-            log.debug('Torrent name: %s not resumed as it has no category%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-    log.info('Started %d of %d torrents.', i, no_of_torrents)
-    log.info('Instructing *arr applications to add new torrents as normal...')
-    manage_torrent_clients(False, lista_dizionari)
-else:
-    log.info('Instructing QBittorrent to disable auto start for new torrents...')
-    qb.set_preferences(start_paused_enabled=True)
-    log.info('Pausing active torrents...')
-    torrents = qb.torrents(filter='downloading')
-    no_of_torrents = len(torrents)
-    i = 0
-    for torrent in torrents:
-        if torrent['state'] == 'downloading' or torrent['state'] == 'queuedDL' or torrent['state'] == 'stalledDL':
-            if DO_NOT_PAUSE_TAG not in torrent['tags']:
-                if DRY_RUN != 'yes':
-                    qb.pause(torrent['hash'])
-                log.debug('Torrent name: %s paused%s', torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-                i = i + 1
-            else:
-                log.debug('Torrent name: %s not paused as tag %s avoids it%s', torrent['name'], DO_NOT_PAUSE_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-    log.info('Paused %d of %d torrents.', i, no_of_torrents)
-    log.info('Instructing *arr applications to add new torrents as paused...')
-    manage_torrent_clients(True, lista_dizionari)
+                    log.debug('Torrent name: %s not paused as tag %s avoids it%s', torrent['name'], DO_NOT_PAUSE_TAG, ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+        log.info('Paused %d of %d torrents.', i, no_of_torrents)
+        log.info('Instructing *arr applications to add new torrents as paused...')
+        manage_torrent_clients(True, lista_dizionari)
 
 # qb.logout() Not working anymore? Idk
