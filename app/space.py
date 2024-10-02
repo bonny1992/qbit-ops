@@ -150,8 +150,6 @@ conn_info = dict(
     password=QBIT_PASS,
 )
 
-free_gb = 50
-
 with qbittorrentapi.Client(**conn_info) as qbt_client:
 
     if free_gb > (MIN_SPACE_GB + SWEET_SPOT_GB):
