@@ -4,3 +4,8 @@ jobs:
         - python3
         - /app/space.py
       schedule: "* * * * *"
+    - name: cycle-torrents
+      command:
+        - python3
+        - /app/cycle.py
+      schedule: "0 * * * *"
