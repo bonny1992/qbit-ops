@@ -77,7 +77,7 @@ with qbittorrentapi.Client(**conn_info) as qbt_client:
             log.info("Group [%s]: only one torrent, nothing to cycle.", group_tag)
             continue
 
-        # Find the currently active torrent (first one in an active state)
+        # Find the currently active torrent (first one found wins)
         active_index = None
         for idx, t in enumerate(torrents):
             if t['state'] in ACTIVE_STATES:
@@ -95,46 +95,50 @@ with qbittorrentapi.Client(**conn_info) as qbt_client:
                          group_tag, active_torrent['name'], active_torrent['dlspeed'], MIN_DL_SPEED)
                 continue
 
-            # Pause it and mark it so space.py does not resume it prematurely
-            log.debug("Group [%s]: pausing '%s'%s",
-                      group_tag, active_torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-            if DRY_RUN != 'yes':
-                active_torrent.pause()
-                active_torrent.add_tags(tags=DO_NOT_RESUME_TAG)
-            log.info("Group [%s]: paused '%s' and tagged '%s'%s",
-                     group_tag, active_torrent['name'], DO_NOT_RESUME_TAG,
-                     ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-
-            # Resume the next torrent in the group (wrap around)
-            next_index   = (active_index + 1) % len(torrents)
-            next_torrent = torrents[next_index]
-            log.debug("Group [%s]: resuming '%s'%s",
-                      group_tag, next_torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-            if DRY_RUN != 'yes':
-                next_torrent.remove_tags(tags=DO_NOT_RESUME_TAG)
-                next_torrent.resume()
-                resumed_hashes.append(next_torrent['hash'])
-            log.info("Group [%s]: resumed '%s'%s",
-                     group_tag, next_torrent['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+            # Next torrent to activate (wrap around)
+            next_index = (active_index + 1) % len(torrents)
 
         else:
-            # Nothing active in this group — resume the first paused torrent we find
-            log.info("Group [%s]: no active torrent found, looking for a paused one to start.", group_tag)
-            resumed_one = False
-            for t in torrents:
+            # Nothing active — pick the first paused torrent as the one to start
+            log.info("Group [%s]: no active torrent found, will start the first paused one.", group_tag)
+            next_index = None
+            for idx, t in enumerate(torrents):
                 if t['state'] in PAUSED_STATES:
-                    log.debug("Group [%s]: resuming '%s'%s",
+                    next_index = idx
+                    break
+            if next_index is None:
+                log.info("Group [%s]: no paused torrent found either, nothing to do.", group_tag)
+                continue
+
+        # Pause ALL torrents in the group except next_index,
+        # and resume only the chosen one — ensures exactly one is active at a time
+        for idx, t in enumerate(torrents):
+            if idx == next_index:
+                log.debug("Group [%s]: resuming '%s'%s",
+                          group_tag, t['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                if DRY_RUN != 'yes':
+                    t.remove_tags(tags=DO_NOT_RESUME_TAG)
+                    t.resume()
+                    resumed_hashes.append(t['hash'])
+                log.info("Group [%s]: resumed '%s'%s",
+                         group_tag, t['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+            else:
+                if t['state'] not in PAUSED_STATES:
+                    log.debug("Group [%s]: pausing '%s'%s",
                               group_tag, t['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
                     if DRY_RUN != 'yes':
-                        t.remove_tags(tags=DO_NOT_RESUME_TAG)
-                        t.resume()
-                        resumed_hashes.append(t['hash'])
-                    log.info("Group [%s]: resumed '%s'%s",
-                             group_tag, t['name'], ' [SIMULATED]' if DRY_RUN == 'yes' else '')
-                    resumed_one = True
-                    break
-            if not resumed_one:
-                log.info("Group [%s]: no paused torrent found either, nothing to do.", group_tag)
+                        t.pause()
+                        t.add_tags(tags=DO_NOT_RESUME_TAG)
+                    log.info("Group [%s]: paused '%s' and tagged '%s'%s",
+                             group_tag, t['name'], DO_NOT_RESUME_TAG,
+                             ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                else:
+                    # Already paused, just make sure the tag is there
+                    log.debug("Group [%s]: '%s' already paused, ensuring tag '%s'%s",
+                              group_tag, t['name'], DO_NOT_RESUME_TAG,
+                              ' [SIMULATED]' if DRY_RUN == 'yes' else '')
+                    if DRY_RUN != 'yes':
+                        t.add_tags(tags=DO_NOT_RESUME_TAG)
 
     # After all groups are processed, wait and force-reannounce every resumed torrent
     if resumed_hashes:
