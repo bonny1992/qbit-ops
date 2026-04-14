@@ -8,4 +8,4 @@ jobs:
       command:
         - python3
         - /app/cycle.py
-      schedule: "0 * * * *"
+      schedule: "0 */6 * * *"
