@@ -31,7 +31,8 @@ RUN echo "**** install build dependencies ****" && \
       -r /app/requirements.txt && \
     \
     echo "**** cleanup ****" && \
-    chown -R abc:abc /config && \
+    chown -R abc:abc /config /app && \
     apk del .build-deps
 
 COPY root/ /
+RUN chmod +x /etc/services.d/*/run
