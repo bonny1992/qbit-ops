@@ -16,23 +16,22 @@ ENV DOWNLOAD_DIR=/
 ENV DRY_RUN=no
 ENV SET_DEBUG=no
 
-RUN echo "**** install dependencies ****" && \
-    apk add --no-cache python3 python3-dev alpine-sdk && \
-    \
-    echo "**** install pip ****" && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --no-cache --upgrade pip setuptools wheel && \
-    if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi
-    
 COPY app/ /app
 COPY config/ /config
 
-RUN chown -R abc:abc /config && \
-    pip install -r /app/requirements.txt && \
-    apk del python3-dev alpine-sdk
-
+RUN echo "**** install build dependencies ****" && \
+    apk add --no-cache --virtual .build-deps python3-dev alpine-sdk && \
+    apk add --no-cache python3 && \
+    \
+    echo "**** create venv and install requirements ****" && \
+    python3 -m venv /lsiopy && \
+    pip install -U --no-cache-dir pip setuptools wheel && \
+    pip install -U --no-cache-dir \
+      --find-links https://wheel-index.linuxserver.io/alpine-3.23/ \
+      -r /app/requirements.txt && \
+    \
+    echo "**** cleanup ****" && \
+    chown -R abc:abc /config && \
+    apk del .build-deps
 
 COPY root/ /
-
