@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM lsiobase/alpine:3.11
+FROM --platform=$BUILDPLATFORM ghcr.io/linuxserver/baseimage-alpine:3.23
 
 LABEL org.opencontainers.image.source=https://github.com/bonny1992/qbit-ops
 

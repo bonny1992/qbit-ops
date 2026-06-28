@@ -12,7 +12,7 @@ multidict==5.0.2
 packaging==24.1
 python-dateutil==2.8.1
 pytz==2020.4
-qbittorrent-api==2024.9.67
+qbittorrent-api>=2026.5.0
 requests==2.25.0
 ruamel.yaml==0.16.12
 ruamel.yaml.clib==0.2.2
